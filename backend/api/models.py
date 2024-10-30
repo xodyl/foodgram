@@ -58,7 +58,7 @@ class Recipe(models.Model):
         upload_to="recipes/",
         verbose_name='Image'
     ) 
-    text = models.TextField(vebose_name='Recipe text')  
+    text = models.TextField(verbose_name='Recipe text')  
     ingredients = models.ManyToManyField(
         Ingredient, 
         through='RecipeIngredient',

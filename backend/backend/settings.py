@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'django_filters',
+    'djoser',
+    'api',
     'users',
 ]
 
@@ -36,21 +38,37 @@ EMAIL_USE_SSL = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'TOKEN_OBTAIN_SERIALIZER': 'api.serializers.CustomTokenObtainPairSerializer',
+# AUTHENTICATION_BACKENDS = [
+#     'users.backends.EmailAuthBackend',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.SignUpSerializer',
+        'current_user': 'users.serializers.UserSerializer',
+        'user': 'users.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    }
+
 }
 
 MIDDLEWARE = [
@@ -87,8 +105,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
 
