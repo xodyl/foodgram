@@ -1,16 +1,26 @@
+import base64
 import re
 
 from rest_framework import serializers
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 
-from api.serializers import Base64ImageField
 from api.constants import USERNAME_LENGTH
 from users.constants import EMAIL_FIELD_LENGTH
 
 
 User = get_user_model()
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        return super().to_internal_value(data)
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -35,6 +45,8 @@ class UserSerializer(BaseUserSerializer):
         max_length=USERNAME_LENGTH,
         required=True
     )
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
     avatar = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -46,10 +58,17 @@ class UserSerializer(BaseUserSerializer):
     def validate(self, attrs):
         if self.context['request'].method == 'PATCH':
             username = attrs.get('username')
-            if username is not None and not re.match(r'^[\w.@+-]+$', username):
-                raise serializers.ValidationError(
-                    r'Username must match the pattern: ^[\w.@+-]+\Z'
-                )
+            first_name = attrs.get('first_name')
+            last_name = attrs.get('last_name')
+
+            # if first_name == '' or last_name == '':
+            #     raise serializers.ValidationError(
+            #         r'First and last name should not be empty.'
+            #     )
+            # if username is not None and not re.match(r'^[\w.@+-]+$', username):
+            #     raise serializers.ValidationError(
+            #         r'Username must match the pattern: ^[\w.@+-]+\Z'
+            #     )
             if 'username' not in attrs or 'email' not in attrs:
                 return attrs
         return super().validate(attrs)
@@ -69,7 +88,7 @@ class SignUpSerializer(BaseUserCreateSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password')
 
     def validate_email(self, value):
         existing_user = User.objects.filter(email=value).first()

@@ -50,9 +50,9 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Author"
     )
-    title = models.CharField(
+    name = models.CharField(
         max_length=200,
-        verbose_name='Title'
+        verbose_name='Name'
     )
     image = models.ImageField(
         upload_to="recipes/",
@@ -81,7 +81,7 @@ class Recipe(models.Model):
         verbose_name_plural = 'Recipes'
         constraints = [
             models.UniqueConstraint(
-                fields=('author', 'title'), name='unique recipe'
+                fields=('author', 'name'), name='unique recipe'
             )
         ]
         ordering = ('pub_date',)
@@ -92,9 +92,9 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.FloatField() 
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,  related_name='ingredients')
+    amount = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.amount} {self.ingredient.measurement_unit} of {self.ingredient.name} in {self.recipe.title}"

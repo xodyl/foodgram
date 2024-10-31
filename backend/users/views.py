@@ -64,26 +64,3 @@ class UsersViewSet(BaseUserViewSet):
         serializer = UserSerializer(obj)
         return Response(serializer.data)
  
-
-# class UserProfileView(views.APIView):
-#     permission_classes = (permissions.IsAuthenticated,)
-#
-#     def get_user(self):
-#         return self.request.user
-#
-#     def get(self, request, format=None):
-#         serializer = UserProfileSerializer(self.get_user())
-#         return Response(serializer.data)
-#
-#     def patch(self, request, format=None):
-#         instance = self.get_user()
-#         serializer = UserProfileSerializer(
-#             instance,
-#             data=request.data,
-#             partial=True,
-#             context={'request': request}
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-

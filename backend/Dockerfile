@@ -8,4 +8,4 @@ RUN pip install --upgrade pip && pip install gunicorn==20.1.0 && pip install -r 
 
 COPY . .
 
-CMD ["gunicorn", "--bind", "0.0.0.0:9000", "backend.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi"]
