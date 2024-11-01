@@ -8,8 +8,9 @@ from rest_framework.decorators import action
 
 from users.serializers import (
     SignUpSerializer,
-    UserSerializer,
     AvatarSerializer,
+    UserProfileSerializer,
+    SetPasswordSerializer,
 ) 
 
 
@@ -17,22 +18,22 @@ User = get_user_model()
 
 
 class UsersViewSet(BaseUserViewSet):
-    filter_backends = (SearchFilter,)
-    ordering = ('username', 'id')
-    search_fields = ('id', )
-    lookup_field = 'id'
-
-    def get_queryset(self):
-        return User.objects.all()
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrive'):
-            return UserSerializer
-        return SignUpSerializer
+        if self.request.method == 'POST':
+            return SignUpSerializer
+        if self.request.method == 'GET':
+            return UserProfileSerializer
 
-    @action(detail=False, methods=['put', 'delete'], 
-            url_path='me/avatar', serializer_class=AvatarSerializer, 
-            permission_classes=(permissions.IsAuthenticated,))
+    @action(
+        ['PUT', 'DELETE'], 
+        detail=False, 
+        url_path='me/avatar', 
+        serializer_class=AvatarSerializer, 
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def upload_avatar(self, request, *args, **kwargs):
         user = get_object_or_404(User, id=self.request.user.id)
         if request.method == 'PUT':
@@ -55,12 +56,35 @@ class UsersViewSet(BaseUserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=False, methods=('get',),
-        url_path='me', serializer_class=UserSerializer,
-        permission_classes=(permissions.IsAuthenticated,)
+        ['GET'],
+        detail=False,
+        url_name='current_user',
+        permission_classes=[permissions.IsAuthenticated, ]
     )
-    def me(self, request, *args, **kwargs):
-        obj = get_object_or_404(User, pk=request.user.pk)
-        serializer = UserSerializer(obj)
-        return Response(serializer.data)
+    def me(self, request):
+        serializer = UserProfileSerializer(
+            request.user,
+            context={'request': request}
+        )
+        return Response(data=serializer.data)
  
+    @action(
+        ['POST'],
+        detail=False,
+        url_name='set_new_password',
+        permission_classes=[permissions.IsAuthenticated, ]
+    )
+    def set_password(self, request):
+        serializer = SetPasswordSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(
+            instance=self.request.user,
+            validated_data=serializer.validated_data
+        )
+        return Response(
+            'Пароль успешно изменен',
+            status=status.HTTP_200_OK
+        )

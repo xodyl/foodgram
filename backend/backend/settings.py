@@ -11,21 +11,30 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+ADDED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'django_filters',
+    'urlshortner',
     'djoser',
+]
+
+PRODJECT_APPS = [
     'api',
     'users',
 ]
+
+INSTALLED_APPS = DJANGO_APPS + ADDED_APPS + PRODJECT_APPS
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -44,6 +53,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
@@ -60,9 +72,10 @@ DJOSER = {
     },
     'HIDE_USERS': False,
     'SERIALIZERS': {
+        'user': 'users.serializers.UserProfileSerializer',
         'user_create': 'users.serializers.SignUpSerializer',
-        'current_user': 'users.serializers.UserSerializer',
-        'user': 'users.serializers.UserSerializer',
+        'current_user': 'backend.accounts.serializers.UserProfileSerializer',
+        'token_create': 'djoser.serializers.TokenCreateSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
