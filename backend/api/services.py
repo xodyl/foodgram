@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.http import HttpResponse
 from urlshortner.utils import shorten_url
 from urlshortner.models import Url
@@ -21,32 +23,22 @@ def generate_short_link(request, recipe_id):
     
 
 def list_to_txt(user):
-    text_shop_list = 'Список покупок \n\n'
-    measurement_unit = {}
-    ingridient_amount = {}
-    ingridients = RecipeIngredient.objects.filter(
-        recipe__shoping_list__user=user
-    ).values(
-        'ingredient__name', 'ingredient__measurement_unit', 'amount')
-    for ingredient in ingridients:
-        if ingredient['ingredient__name'] in ingridient_amount:
-            ingridient_amount[
-                ingredient['ingredient__name']
-            ] += ingredient['amount']
-        else:
-            measurement_unit[
-                ingredient['ingredient__name']
-            ] = ingredient['ingredient__measurement_unit']
-            ingridient_amount[
-                ingredient['ingredient__name']
-            ] = ingredient['amount']
-    for ingredient, amount in ingridient_amount .items():
-        text_shop_list += (
-            f'{ingredient} - {amount}'
-            f'{measurement_unit[ingredient]}\n'
-        )
-    response = HttpResponse(text_shop_list, content_type='text/plain')
-    response[
-        'Content-Disposition'
-    ] = 'attachment; filename="shopping_list.txt"'
+    text_list = 'Список покупок\n\n'
+    units = {}
+    amounts = defaultdict(int)
+
+    ingredients = RecipeIngredient.objects.filter(
+        recipe__shopping_list__user=user
+    ).values('ingredient__name', 'ingredient__measurement_unit', 'amount')
+
+    for item in ingredients:
+        name = item['ingredient__name']
+        units[name] = item['ingredient__measurement_unit']
+        amounts[name] += item['amount']
+
+    for name, total_amount in amounts.items():
+        text_list += f'{name} - {total_amount} {units[name]}\n'
+
+    response = HttpResponse(text_list, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
     return response
