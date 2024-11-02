@@ -160,8 +160,3 @@ class RecipeSerializer(serializers.ModelSerializer, AmountMixin, ChosenMixin):
         return self.get_chosen_recipe(obj, ShopingList)
 
 
-class RecipeMiniSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time',)
-

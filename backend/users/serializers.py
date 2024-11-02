@@ -9,10 +9,18 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
 from api.constants import USERNAME_LENGTH
+from api.models import Subscription, Recipe
 from users.constants import EMAIL_FIELD_LENGTH
 
 
 User = get_user_model()
+
+
+class RecipeMiniSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time',)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -39,6 +47,14 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 class SignUpSerializer(BaseUserCreateSerializer):
     password = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(
+        required=True, 
+        max_length=USERNAME_LENGTH
+    )
+    last_name = serializers.CharField(
+        required=True, 
+        max_length=USERNAME_LENGTH
+    )
     email = serializers.EmailField(
         max_length=EMAIL_FIELD_LENGTH,
         required=True
@@ -51,6 +67,17 @@ class SignUpSerializer(BaseUserCreateSerializer):
     class Meta:
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password')
+
+    def validate_first_name(self, value):
+        return self._validate_name_length(value)
+
+    def validate_last_name(self, value):
+        return self._validate_name_length(value)
+
+    def _validate_name_length(self, value):
+        if len(value) > USERNAME_LENGTH:
+            raise serializers.ValidationError('Имя не может содержать более 50 символов.')
+        return value
 
     def validate_email(self, value):
         existing_user = User.objects.filter(email=value).first()
@@ -119,3 +146,54 @@ class SetPasswordSerializer(serializers.Serializer):
         instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = RecipeMiniSerializer(
+        read_only=True,
+        many=True,
+        source='author.recipe'
+    )
+    recipes_count = serializers.SerializerMethodField()
+    avatar = Base64ImageField(
+        source='author.avatar',
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = Subscription
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count', 'avatar')
+
+    def validate(self, data):
+        if self.context['user'] == self.context['author']:
+            raise ValidationError('Нельзя подписываться на себя!')
+        if self.context['is_subscription_exist']:
+            raise ValidationError('Нельзя подписаться дважды!')
+        return data
+
+    def get_is_subscribed(self, obj):
+        if not obj.user:
+            return False
+        return obj.user.subscriptions.filter(author=obj.author).exists()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        recipes_limit = self.context['request'].GET.get('recipes_limit')
+        if recipes_limit:
+            representation['recipes'] = representation[
+                'recipes'
+            ][:int(recipes_limit)]
+        return representation
+
+    def get_recipes_count(self, obj):
+        return obj.author.recipe.count()
+

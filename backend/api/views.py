@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters, permissions, status
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,10 +10,12 @@ from django.http import Http404
 from api.models import Tag, Ingredient, Recipe, ShopingList, Favorite
 from api.mixins import IngridientTagMixin 
 from api.permissions import IsAuthorOrReadOnly
+from api.pagination import LimitPagination
 from api.filters import IngredientFilter, TagFilter, RecipeFilter 
 from api import serializers
 from api.constants import MESSAGES
 from api.services import list_to_txt, generate_short_link
+from users.serializers import RecipeMiniSerializer
 
 
 class TagViewSet(IngridientTagMixin):
@@ -32,6 +34,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = LimitPagination
     permission_classes = (IsAuthorOrReadOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
@@ -69,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         model.objects.create(recipe=recipe, user=user)
-        serializer = serializers.RecipeMiniSerializer(recipe)
+        serializer = RecipeMiniSerializer(recipe)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_recipe(self, request, model, pk, error_key):

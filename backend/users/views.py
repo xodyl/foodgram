@@ -6,11 +6,14 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from api.models import Subscription
+from api.pagination import LimitPagination
 from users.serializers import (
     SignUpSerializer,
     AvatarSerializer,
     UserProfileSerializer,
     SetPasswordSerializer,
+    SubscribeSerializer,
 ) 
 
 
@@ -19,6 +22,7 @@ User = get_user_model()
 
 class UsersViewSet(BaseUserViewSet):
     queryset = User.objects.all()
+    pagination_class = LimitPagination
     permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
@@ -85,6 +89,57 @@ class UsersViewSet(BaseUserViewSet):
             validated_data=serializer.validated_data
         )
         return Response(
-            'Пароль успешно изменен',
-            status=status.HTTP_200_OK
+            status=status.HTTP_204_NO_CONTENT
         )
+
+    @action(
+        ['POST', 'DELETE'],
+        detail=True,
+        url_name='subscribe',
+        permission_classes=(permissions.IsAuthenticated, )
+    )
+    def subscribe(self, request, id):
+        author = get_object_or_404(User, id=id)
+        user = self.request.user
+        is_subscription_exist = user.subscriptions.filter(
+            author=author
+        ).exists()
+        if request.method == 'POST':
+            serializer = SubscribeSerializer(
+                data=request.data,
+                context={
+                    'user': user,
+                    'author': author,
+                    'request': request,
+                    'is_subscription_exist': is_subscription_exist}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if is_subscription_exist:
+            user.subscriptions.get(author=author).delete()
+            return Response(
+                'Успешная отписка',
+                status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(
+            {'errors': 'Вы не подписаны'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(
+        ['GET'],
+        detail=False,
+        url_name='get_subscriptions',
+        permission_classes=(permissions.IsAuthenticated, ),
+    )
+    def subscriptions(self, request):
+        paginate_subs = self.paginate_queryset(
+            Subscription.objects.filter(user=self.request.user)
+        )
+        serializer = SubscribeSerializer(
+            paginate_subs,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
