@@ -23,22 +23,22 @@ def generate_short_link(request, recipe_id):
     
 
 def list_to_txt(user):
-    text_list = 'Список покупок\n\n'
-    units = {}
-    amounts = defaultdict(int)
-
+    text_shop_list = 'Список покупок \n\n'
+    ingredient_data = defaultdict(lambda: {'amount': 0, 'unit': ''})
+    
     ingredients = RecipeIngredient.objects.filter(
-        recipe__shopping_list__user=user
+        recipe__shoping_list__user=user
     ).values('ingredient__name', 'ingredient__measurement_unit', 'amount')
-
-    for item in ingredients:
-        name = item['ingredient__name']
-        units[name] = item['ingredient__measurement_unit']
-        amounts[name] += item['amount']
-
-    for name, total_amount in amounts.items():
-        text_list += f'{name} - {total_amount} {units[name]}\n'
-
-    response = HttpResponse(text_list, content_type='text/plain')
+    
+    for ingredient in ingredients:
+        name = ingredient['ingredient__name']
+        ingredient_data[name]['amount'] += ingredient['amount']
+        ingredient_data[name]['unit'] = ingredient['ingredient__measurement_unit']
+    
+    for ingredient, data in ingredient_data.items():
+        text_shop_list += f"{ingredient} - {data['amount']} {data['unit']}\n"
+    
+    response = HttpResponse(text_shop_list, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
     return response
+
