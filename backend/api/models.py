@@ -137,7 +137,6 @@ class RecipeIngredient(models.Model):
         return f'{self.ingredient} {self.amount}'
 
 
-
 class Subscription(models.Model):
     user = models.ForeignKey(
         User,

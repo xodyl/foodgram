@@ -2,12 +2,17 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 
-from api.models import Tag, Ingredient, Recipe, RecipeIngredient, Favorite,  ShopingList
+from api.models import (
+    Tag,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    Favorite,
+    ShopingList
+)
 from users.serializers import UserProfileSerializer, Base64ImageField
 from api.mixins import AmountMixin, ChosenMixin
-from api.constants import ( 
-    MIN_INGREDIENT_AMOUNT, 
-    MAX_INGREDIENT_AMOUNT,
+from api.constants import (
     MIN_INGREDIENT_AMOUNT,
     MAX_INGREDIENT_AMOUNT,
     MIN_COOKING_TIME,
@@ -158,5 +163,3 @@ class RecipeSerializer(serializers.ModelSerializer, AmountMixin, ChosenMixin):
 
     def get_is_in_shopping_cart(self, obj):
         return self.get_chosen_recipe(obj, ShopingList)
-
-

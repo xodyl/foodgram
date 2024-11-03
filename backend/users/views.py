@@ -1,8 +1,7 @@
 from djoser.views import UserViewSet as BaseUserViewSet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework import permissions, views, viewsets, status
-from rest_framework.filters import SearchFilter
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -14,7 +13,7 @@ from users.serializers import (
     UserProfileSerializer,
     SetPasswordSerializer,
     SubscribeSerializer,
-) 
+)
 
 
 User = get_user_model()
@@ -32,24 +31,24 @@ class UsersViewSet(BaseUserViewSet):
             return UserProfileSerializer
 
     @action(
-        ['PUT', 'DELETE'], 
-        detail=False, 
-        url_path='me/avatar', 
-        serializer_class=AvatarSerializer, 
+        ['PUT', 'DELETE'],
+        detail=False,
+        url_path='me/avatar',
+        serializer_class=AvatarSerializer,
         permission_classes=(permissions.IsAuthenticated,)
     )
     def upload_avatar(self, request, *args, **kwargs):
         user = get_object_or_404(User, id=self.request.user.id)
         if request.method == 'PUT':
             serializer = AvatarSerializer(
-                instance=user, 
-                data=request.data, 
-                partial=True, 
-                context={'request':request}
+                instance=user,
+                data=request.data,
+                partial=True,
+                context={'request': request}
             )
             if 'avatar' not in self.request.data:
                 return Response(
-                        status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -71,7 +70,7 @@ class UsersViewSet(BaseUserViewSet):
             context={'request': request}
         )
         return Response(data=serializer.data)
- 
+
     @action(
         ['POST'],
         detail=False,
@@ -142,4 +141,3 @@ class UsersViewSet(BaseUserViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
-

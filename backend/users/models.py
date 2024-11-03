@@ -8,7 +8,7 @@ from users.constants import (
 
 
 class User(AbstractUser):
-    
+
     email = models.EmailField(
         max_length=EMAIL_FIELD_LENGTH,
         unique=True,
@@ -48,4 +48,3 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
-

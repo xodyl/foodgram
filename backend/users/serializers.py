@@ -47,11 +47,11 @@ class AvatarSerializer(serializers.ModelSerializer):
 class SignUpSerializer(BaseUserCreateSerializer):
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField(
-        required=True, 
+        required=True,
         max_length=USERNAME_LENGTH
     )
     last_name = serializers.CharField(
-        required=True, 
+        required=True,
         max_length=USERNAME_LENGTH
     )
     email = serializers.EmailField(
@@ -65,7 +65,9 @@ class SignUpSerializer(BaseUserCreateSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'password')
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name', 'password'
+        )
 
     def validate_first_name(self, value):
         return self._validate_name_length(value)
@@ -75,7 +77,9 @@ class SignUpSerializer(BaseUserCreateSerializer):
 
     def _validate_name_length(self, value):
         if len(value) > USERNAME_LENGTH:
-            raise serializers.ValidationError('Имя не может содержать более 50 символов.')
+            raise serializers.ValidationError(
+                'Имя не может содержать более 50 символов.'
+            )
         return value
 
     def validate_email(self, value):
@@ -100,7 +104,7 @@ class SignUpSerializer(BaseUserCreateSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
-   
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -195,4 +199,3 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipe.count()
-

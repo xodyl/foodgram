@@ -3,7 +3,7 @@ from rest_framework.routers import SimpleRouter
 
 from api.constants import API_VERSION
 from api.views import TagViewSet, IngredientViewSet, RecipeViewSet
-from users.views import UsersViewSet 
+from users.views import UsersViewSet
 
 
 app_name = 'api'
@@ -22,4 +22,3 @@ urlpatterns = [
     path(API_VERSION, include(router.urls)),
     path(API_VERSION + 'auth/', include('djoser.urls.authtoken')),
 ]
-

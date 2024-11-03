@@ -8,10 +8,10 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 
 from api.models import Tag, Ingredient, Recipe, ShopingList, Favorite
-from api.mixins import IngridientTagMixin 
+from api.mixins import IngridientTagMixin
 from api.permissions import IsAuthorOrReadOnly
 from api.pagination import LimitPagination
-from api.filters import IngredientFilter, TagFilter, RecipeFilter 
+from api.filters import IngredientFilter, TagFilter, RecipeFilter
 from api import serializers
 from api.constants import MESSAGES
 from api.services import list_to_txt, generate_short_link
