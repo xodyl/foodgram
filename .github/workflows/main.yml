@@ -102,7 +102,6 @@ jobs:
           cd foodgram
           sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml down
-          sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml up --build -d
           sudo docker compose -f docker-compose.production.yml exec backend python3 manage.py makemigrations users
           sudo docker compose -f docker-compose.production.yml exec backend python3 manage.py makemigrations api
