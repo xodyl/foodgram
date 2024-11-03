@@ -1,4 +1,3 @@
-
 API_VERSION: str = ''
 USERNAME_LENGTH: int = 150
 
@@ -38,4 +37,3 @@ MESSAGES = {
         'SHOPPING_LIST': 'Рецепт успешно удален из списка покупок.',
     },
 }
-
