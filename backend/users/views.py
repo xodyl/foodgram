@@ -119,7 +119,6 @@ class UsersViewSet(BaseUserViewSet):
         if is_subscription_exist:
             user.subscriptions.get(author=author).delete()
             return Response(
-                'Успешная отписка',
                 status=status.HTTP_204_NO_CONTENT
             )
         return Response(
@@ -143,3 +142,4 @@ class UsersViewSet(BaseUserViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
+

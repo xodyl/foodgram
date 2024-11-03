@@ -7,10 +7,9 @@ volumes:
 services:
   db:
     image: postgres:13.10
+    env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
-    env_file:
-      - .env
   backend:
     image: xodyl/foodgram_backend
     env_file: .env
@@ -21,21 +20,21 @@ services:
       - media:/app/media
   frontend:
     image: xodyl/foodgram_frontend
-    env_file:
-      - .env
-    command: cp -r /app/build/. /frontend_static/
+    env_file: .env
+    command: cp -r /app/build/. /static/
     depends_on:
       - backend
     volumes:
-    - static:/frontend_static
+    - static:/static
   gateway:
     image: xodyl/foodgram_gateway
+    env_file: .env
     ports:
-      - "8000:80"
+      - 8000:80
     volumes:
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - static:/staticfiles
-      - media:/app/media
+      - static:/static/
+      - media:/app/media/
     depends_on:
       - backend
     restart: always
