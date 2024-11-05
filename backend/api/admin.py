@@ -39,7 +39,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('tags', 'pub_date',)
     list_editable = ('name', 'cooking_time',)
-    filter_horizontal = ('tags', 'ingredients')
+    filter_horizontal = ('tags',)
     search_fields = ('name', 'author__username', 'ingredients__name')
 
     def in_favorite_amount(self, obj):
@@ -51,3 +51,4 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.empty_value_display = 'Не задано'
 admin.site.unregister(auth.models.Group)
 admin.site.unregister(TokenProxy)
+

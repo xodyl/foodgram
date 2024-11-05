@@ -20,7 +20,6 @@ class User(admin.ModelAdmin):
         'username',
         'first_name',
         'last_name',
-        'role',
         'email',
         'avatar'
     )
