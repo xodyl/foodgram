@@ -81,10 +81,7 @@ class RecipeGetSerializer(serializers.ModelSerializer, ChosenMixin):
 
     class Meta:
         model = Recipe
-        fields = (
-            'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
-        )
+        fields = '__all__'
         read_only_fields = ('author',)
 
     def get_is_favorited(self, obj):

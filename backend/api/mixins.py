@@ -17,25 +17,21 @@ class IngridientTagMixin(
 class AmountMixin():
     def update_or_create_ingredient(self, recipe, ingredients) -> None:
         recipe.ingredients.clear()
-        ingredient_list = []
-        for ingredient in ingredients:
-            ingredient_list.append(
-                RecipeIngredient(
-                    recipe=recipe,
-                    ingredient=ingredient['id'],
-                    amount=ingredient['amount']
-                )
+        ingredient_list = [
+            RecipeIngredient(
+                recipe=recipe,
+                ingredient=ingredient['id'],
+                amount=ingredient['amount']
             )
+            for ingredient in ingredients
+        ]
         RecipeIngredient.objects.bulk_create(ingredient_list)
 
 
 class ChosenMixin():
-
     def get_chosen_recipe(self, obj, model) -> bool:
         user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return model.objects.filter(
-            user=user,
-            recipe=obj
-        ).exists()
+        return (
+            False if user.is_anonymous
+            else model.objects.filter(user=user, recipe=obj).exists()
+        )
