@@ -51,4 +51,3 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.empty_value_display = 'Не задано'
 admin.site.unregister(auth.models.Group)
 admin.site.unregister(TokenProxy)
-
