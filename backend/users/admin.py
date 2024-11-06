@@ -24,4 +24,3 @@ class User(admin.ModelAdmin):
         'avatar'
     )
     search_fields = ('user', 'email',)
-    list_filter = ('role',)
