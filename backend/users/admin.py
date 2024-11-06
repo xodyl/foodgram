@@ -25,4 +25,3 @@ class User(admin.ModelAdmin):
     )
     search_fields = ('user', 'email',)
     list_filter = ('role',)
-
