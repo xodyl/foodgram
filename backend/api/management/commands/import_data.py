@@ -1,58 +1,46 @@
 import csv
 
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.core.management.base import BaseCommand
 
 from api.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
-    help = 'Import ingredients and tags from CSV files'
+    help = 'Импортирует данные из CSV файлов для ингредиентов и тегов'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--ingredients',
             type=str,
-            help='Path to ingredients CSV file'
+            help='Путь к CSV-файлу с ингредиентами'
         )
-        parser.add_argument('--tags', type=str, help='Path to tags CSV file')
+        parser.add_argument(
+            '--tags',
+            type=str,
+            help='Путь к CSV-файлу с тегами'
+        )
 
-    @transaction.atomic
-    def handle(self, *args, **options):
-        ingredients_path = options['ingredients']
-        tags_path = options['tags']
+    def handle(self, *args, **kwargs):
+        ingredients_file = kwargs['ingredients']
+        tags_file = kwargs['tags']
 
-        if ingredients_path:
-            try:
-                with open(
-                    ingredients_path, newline='', encoding='utf-8'
-                ) as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    Ingredient.objects.all().delete()
-                    Ingredient.objects.bulk_create([
-                        Ingredient(
-                            name=row['name'],
-                            measurement_unit=row['measurement_unit']
+        with open(ingredients_file, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if len(row) >= 2:
+                    name, measurement_unit = row
+                    if name:
+                        Ingredient.objects.create(
+                            name=name,
+                            measurement_unit=measurement_unit
                         )
-                        for row in reader
-                    ])
-                self.stdout.write(
-                    self.style.SUCCESS('Ingredients imported successfully.')
-                )
-            except Exception as e:
-                raise CommandError(f'Error importing ingredients: {e}')
 
-        if tags_path:
-            try:
-                with open(tags_path, newline='', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    Tag.objects.all().delete()  # Clear existing data if needed
-                    Tag.objects.bulk_create([
-                        Tag(name=row['name'], slug=row['slug'])
-                        for row in reader
-                    ])
-                self.stdout.write(
-                    self.style.SUCCESS('Tags imported successfully.')
-                )
-            except Exception as e:
-                raise CommandError(f'Error importing tags: {e}')
+        with open(tags_file, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if len(row) >= 2:
+                    name, slug = row
+                    if name:
+                        Tag.objects.create(name=name, slug=slug)
+
+        self.stdout.write(self.style.SUCCESS('Данные успешно импортированы!'))
