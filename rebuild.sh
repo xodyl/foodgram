@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo docker compose down --volume
+sudo docker compose -f docker-compose.production.yml down --volume
 # sudo docker compose down  
-sudo docker compose up --build 
+sudo docker compose -f docker-compose.production.yml up --build 
 
