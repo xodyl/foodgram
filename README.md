@@ -22,3 +22,16 @@ foodgram-pet.ddns.net
   - отправки статуса в Telegram
 - Поддержка загрузки "Списка покупок" в формате `.txt` с подсчитанным количеством ингредиентов.
 - Генерация короткой ссылки для рецептов.
+
+## Миграции .csv
+
+- Скопировать .csv файлы
+
+```bash
+sudo docker cp ./data/ingredients.csv foodgram-backend-1:/app/data/ingredients.csv
+```
+- Произвести миграции 
+
+```bash
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py import_data --ingredients data/ingredients.csv --tags data/tags.csv
+```
