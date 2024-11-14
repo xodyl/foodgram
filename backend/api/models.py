@@ -60,7 +60,7 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор рецепта',
-        related_name='recipes',
+        related_name='recipe',
     )
     name = models.CharField(
         max_length=TEXT_FIELD_LENGTH,
@@ -71,13 +71,13 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        verbose_name='Ингредиенты',
-        related_name='recipes'
+        verbose_name='Ингредиенты рецепта',
+        related_name='ingredients_recipes'
     )
     tags = models.ManyToManyField(
         Tag,
-        verbose_name='Тэги',
-        related_name='recipes'
+        verbose_name='Теги рецепта',
+        related_name='taggs_recipes'
     )
     cooking_time = models.IntegerField(
         validators=(
@@ -193,12 +193,10 @@ class ShopingList(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_list',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='in_shopping_lists',
     )
 
     class Meta:

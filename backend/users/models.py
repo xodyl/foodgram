@@ -16,10 +16,10 @@ class User(AbstractUser):
         blank=False,
         verbose_name='Email addres'
     )
-    is_subscribed = models.BooleanField(
-        default=False,
-        verbose_name="Is subscribed"
-    )
+    # is_subscribed = models.BooleanField(
+    #     default=False,
+    #     verbose_name="Is subscribed"
+    # )
     avatar = models.ImageField(
         upload_to='avatars/',
         null=True,

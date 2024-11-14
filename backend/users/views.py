@@ -110,11 +110,13 @@ class UsersViewSet(BaseUserViewSet):
                     'user': user,
                     'author': author,
                     'request': request,
-                    'is_subscription_exist': is_subscription_exist}
+                    'is_subscription_exist': is_subscription_exist
+                }
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         if is_subscription_exist:
             user.subscriptions.get(author=author).delete()
             return Response(

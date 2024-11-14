@@ -24,23 +24,35 @@ class Command(BaseCommand):
         ingredients_file = kwargs['ingredients']
         tags_file = kwargs['tags']
 
-        with open(ingredients_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if len(row) >= 2:
-                    name, measurement_unit = row
-                    if name:
-                        Ingredient.objects.create(
-                            name=name,
-                            measurement_unit=measurement_unit
-                        )
+        if ingredients_file:
+            ingredients = []
+            with open(ingredients_file, 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if len(row) >= 2:
+                        name, measurement_unit = row
+                        if name:
+                            ingredients.append(Ingredient(
+                                name=name,
+                                measurement_unit=measurement_unit
+                            ))
+            Ingredient.objects.bulk_create(ingredients, ignore_conflicts=True)
+            self.stdout.write(
+                self.style.SUCCESS('Ингредиенты успешно импортированы!')
+            )
 
-        with open(tags_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if len(row) >= 2:
-                    name, slug = row
-                    if name:
-                        Tag.objects.create(name=name, slug=slug)
+        if tags_file:
+            tags = []
+            with open(tags_file, 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if len(row) >= 2:
+                        name, slug = row
+                        if name:
+                            tags.append(Tag(name=name, slug=slug))
+            Tag.objects.bulk_create(tags, ignore_conflicts=True)
+            self.stdout.write(
+                self.style.SUCCESS('Теги успешно импортированы!')
+            )
 
         self.stdout.write(self.style.SUCCESS('Данные успешно импортированы!'))

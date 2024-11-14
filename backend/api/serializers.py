@@ -81,7 +81,10 @@ class RecipeGetSerializer(serializers.ModelSerializer, ChosenMixin):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = (
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
+        )
         read_only_fields = ('author',)
 
     def get_is_favorited(self, obj):
@@ -112,7 +115,10 @@ class RecipeSerializer(serializers.ModelSerializer, AmountMixin, ChosenMixin):
         )
 
     def validate(self, data):
-        unique_data: set[int] = set()
+        unique_data: dict[str, set[int]] = {
+            'ingredients': set(),
+            'tags': set()
+        }
         for model in ('ingredients', 'tags'):
             if not data.get(model):
                 raise ValidationError(
@@ -121,11 +127,11 @@ class RecipeSerializer(serializers.ModelSerializer, AmountMixin, ChosenMixin):
             for obj in data.get(model):
                 if isinstance(obj, dict):
                     obj = obj.get('id')
-                if obj.id in unique_data:
+                if obj in unique_data[model]:
                     raise ValidationError(
                         RECIPE_VALIDATION_MESSAGES['NOT_UNIQUE'][model]
                     )
-                unique_data.add(obj.id)
+                unique_data[model].add(obj)
         return data
 
     def create(self, validated_data):
