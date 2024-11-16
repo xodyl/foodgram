@@ -3,6 +3,7 @@ import csv
 from django.core.management.base import BaseCommand
 
 from api.models import Ingredient, Tag
+from api.constants import MIN_COLUMNS
 
 
 class Command(BaseCommand):
@@ -29,7 +30,7 @@ class Command(BaseCommand):
             with open(ingredients_file, 'r') as file:
                 reader = csv.reader(file)
                 for row in reader:
-                    if len(row) >= 2:
+                    if len(row) >= MIN_COLUMNS:
                         name, measurement_unit = row
                         if name:
                             ingredients.append(Ingredient(
@@ -46,7 +47,7 @@ class Command(BaseCommand):
             with open(tags_file, 'r') as file:
                 reader = csv.reader(file)
                 for row in reader:
-                    if len(row) >= 2:
+                    if len(row) >= MIN_COLUMNS:
                         name, slug = row
                         if name:
                             tags.append(Tag(name=name, slug=slug))

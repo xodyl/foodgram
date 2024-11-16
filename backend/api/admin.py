@@ -43,7 +43,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username', 'ingredients__name')
 
     def in_favorite_amount(self, obj):
-        return obj.recipe.all().count()
+        return obj.recipe.count()
 
     in_favorite_amount.short_description = 'В избранном'
 
