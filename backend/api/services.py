@@ -7,18 +7,23 @@ from urlshortner.models import Url
 from api.models import RecipeIngredient
 
 
-def generate_short_link(request, recipe_id):
-    domain = request.build_absolute_uri().replace(request.get_full_path(), '')
-    recipe_url = f'{domain}/recipes/{recipe_id}/'
+def generate_short_link(request, pk):
+    base_domain = request.build_absolute_uri(
+    ).replace(request.get_full_path(), '')
 
-    short_url = Url.objects.filter(url=recipe_url).first()
-    if short_url:
-        short_link = f'{domain}/s/{short_url.short_url}/'
+    recipe_url = f'{base_domain}/recipes/{pk}/'
+
+    existing_short_url = Url.objects.filter(url=recipe_url).first()
+    if existing_short_url:
+        short_link = base_domain.replace(
+            request.get_full_path(), ''
+        ) + '/s/' + existing_short_url.short_url + '/'
         return short_link
 
-    short_code = shorten_url(recipe_url, is_permanent=False)
-    short_link = f'{domain}/s/{short_code}'
-
+    recipe_url = shorten_url(recipe_url, is_permanent=False)
+    short_link = base_domain.replace(
+        request.get_full_path(), ''
+    ) + '/s/' + recipe_url
     return short_link
 
 
