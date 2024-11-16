@@ -17,7 +17,7 @@ def generate_short_link(request, pk):
     if existing_short_url:
         short_link = base_domain.replace(
             request.get_full_path(), ''
-        ) + '/s/' + existing_short_url.short_url + '/'
+        ) + '/s/' + existing_short_url.short_url
         return short_link
 
     recipe_url = shorten_url(recipe_url, is_permanent=False)
