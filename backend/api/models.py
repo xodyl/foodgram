@@ -94,7 +94,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'рецепты'
-        ordering = ('pub_date',)
+        ordering = ('-pub_date',)
         default_related_name = 'recipe'
         constraints = [
             models.UniqueConstraint(
