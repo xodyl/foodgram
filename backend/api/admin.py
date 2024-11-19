@@ -75,6 +75,8 @@ class RecipeAdminForm(forms.ModelForm):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
+    extra = 1
+    autocomplete_fields = ('ingredient',)
 
 
 @admin.register(Tag)
@@ -113,6 +115,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_editable = ('name', 'cooking_time',)
     filter_horizontal = ('tags',)
     search_fields = ('name', 'author__username', 'ingredients__name')
+    inlines = (RecipeIngredientInline,)
 
     def in_favorite_amount(self, obj):
         return obj.recipe.count()
