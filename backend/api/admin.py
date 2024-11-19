@@ -1,7 +1,76 @@
+from django import forms
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.contrib import admin, auth
 from rest_framework.authtoken.models import TokenProxy
 
 from api.models import RecipeIngredient, Ingredient, Recipe, Tag
+from api.serializers import (
+    TagSerializer,
+    IngredientSerializer,
+    RecipeSerializer
+)
+
+
+class TagAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        serializer = TagSerializer(data={
+            'name': cleaned_data.get('name'),
+            'slug': cleaned_data.get('slug'),
+        })
+        try:
+            serializer.is_valid(raise_exception=True)
+        except DRFValidationError as e:
+            raise forms.ValidationError(e.detail)
+        return cleaned_data
+
+
+class IngredientAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Ingredient
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        serializer = IngredientSerializer(data={
+            'name': cleaned_data.get('name'),
+            'measurement_unit': cleaned_data.get('measurement_unit'),
+        })
+        try:
+            serializer.is_valid(raise_exception=True)
+        except DRFValidationError as e:
+            raise forms.ValidationError(e.detail)
+        return cleaned_data
+
+
+class RecipeAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        serializer = RecipeSerializer(data={
+            'ingredients': self.cleaned_data.get('recipe_ingredients'),
+            'tags': self.cleaned_data.get('tags'),
+            'image': self.cleaned_data.get('image'),
+            'name': self.cleaned_data.get('name'),
+            'text': self.cleaned_data.get('text'),
+            'cooking_time': self.cleaned_data.get('cooking_time'),
+            'author': self.cleaned_data.get('author'),
+        })
+        try:
+            serializer.is_valid(raise_exception=True)
+        except DRFValidationError as e:
+            raise forms.ValidationError(e.detail)
+        return cleaned_data
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -10,6 +79,7 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    forms = TagAdminForm
     list_display = (
         'name',
         'slug',
@@ -20,6 +90,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
+    forms = IngredientAdminForm
     list_display = (
         'name',
         'measurement_unit',
@@ -30,6 +101,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    form = RecipeAdminForm
     list_display = (
         'author',
         'name',
