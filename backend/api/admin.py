@@ -7,7 +7,6 @@ from api.models import RecipeIngredient, Ingredient, Recipe, Tag
 from api.serializers import (
     TagSerializer,
     IngredientSerializer,
-    RecipeSerializer
 )
 
 
@@ -49,30 +48,6 @@ class IngredientAdminForm(forms.ModelForm):
         return cleaned_data
 
 
-class RecipeAdminForm(forms.ModelForm):
-
-    class Meta:
-        model = Recipe
-        fields = '__all__'
-
-    def clean(self):
-        cleaned_data = super().clean()
-        serializer = RecipeSerializer(data={
-            'ingredients': self.cleaned_data.get('recipe_ingredients'),
-            'tags': self.cleaned_data.get('tags'),
-            'image': self.cleaned_data.get('image'),
-            'name': self.cleaned_data.get('name'),
-            'text': self.cleaned_data.get('text'),
-            'cooking_time': self.cleaned_data.get('cooking_time'),
-            'author': self.cleaned_data.get('author'),
-        })
-        try:
-            serializer.is_valid(raise_exception=True)
-        except DRFValidationError as e:
-            raise forms.ValidationError(e.detail)
-        return cleaned_data
-
-
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
@@ -103,7 +78,6 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    form = RecipeAdminForm
     list_display = (
         'author',
         'name',
@@ -116,6 +90,10 @@ class RecipeAdmin(admin.ModelAdmin):
     filter_horizontal = ('tags',)
     search_fields = ('name', 'author__username', 'ingredients__name')
     inlines = (RecipeIngredientInline,)
+    fields = ('image',
+              ('name', 'author'),
+              'text',
+              ('tags', 'cooking_time'))
 
     def in_favorite_amount(self, obj):
         return obj.recipe.count()
